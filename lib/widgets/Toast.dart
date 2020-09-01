@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Toast {
-  static show(context, title, message, [callback]) {
+  static show(context, title, message) {
     showDialog(
         context: context,
         builder: (context) {
@@ -13,9 +13,6 @@ class Toast {
                 child: Text("确认"),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  if (callback) {
-                    callback();
-                  }
                 },
               )
             ],

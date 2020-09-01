@@ -14,16 +14,6 @@ class DialogRouter extends PageRouteBuilder {
         );
 }
 
-class Loading {
-  static void show(BuildContext context, {bool mateStyle}) {
-    Navigator.of(context).push(DialogRouter(LoadingDialog()));
-  }
-
-  static void hide(BuildContext context) {
-    Navigator.of(context).pop();
-  }
-}
-
 class LoadingDialog extends Dialog {
   @override
   Widget build(BuildContext context) {
@@ -41,5 +31,15 @@ class LoadingDialog extends Dialog {
         onWillPop: () async {
           return Future.value(false);
         });
+  }
+}
+
+class Loading {
+  static void show(BuildContext context, {bool mateStyle}) {
+    Navigator.of(context).push(DialogRouter(LoadingDialog()));
+  }
+
+  static void hide(BuildContext context) {
+    Navigator.of(context).pop();
   }
 }

@@ -18,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   var _submitting = false;
   var _captchaSvg;
 
-  void _toHomePage() {
+  _toHomePage() {
     Navigator.push(
         context, new MaterialPageRoute(builder: (context) => new HomePage()));
   }

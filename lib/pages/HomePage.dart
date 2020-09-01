@@ -4,6 +4,7 @@ import 'package:kis_app/pages/BlogWebViewPage.dart';
 import 'package:kis_app/widgets/SideDrawer.dart';
 import 'package:kis_app/widgets/Request.dart';
 import 'package:kis_app/widgets/Toast.dart';
+import 'package:kis_app/widgets/Loading.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,7 +14,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List blogs = [];
 
-  _fetchBlogs() async {
+  _fetchBlogs(context) async {
+    Loading.show(context);
     try {
       final r = await Request.get("/api/v1/blog");
       final res = r.json();
@@ -26,17 +28,29 @@ class _HomePageState extends State<HomePage> {
       });
     } catch (e) {
       Toast.show(context, "提示", "抱歉, 服务器开小差了");
-    } finally {}
+    } finally {
+      Loading.hide(context);
+    }
   }
 
   _renderPaper(context, index) {
     final blog = blogs[index];
     return Card(
       child: ListTile(
-        title: Text(blog['title']),
+        contentPadding: EdgeInsets.only(top: 8, bottom: 8, left: 15, right: 15),
+        title: Container(
+          padding: EdgeInsets.only(bottom: 5),
+          child: Text(blog['title']),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [Text("${blog['createdAt']}"), Text("${blog['summary']}")],
+          children: [
+            Container(
+              padding: EdgeInsets.only(bottom: 5),
+              child: Text("${blog['createdAt']}"),
+            ),
+            blog['summary'] != '' ? Text("${blog['summary']}") : Container()
+          ],
         ),
         trailing: Icon(Icons.arrow_right),
         onTap: () {
@@ -65,20 +79,29 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _fetchBlogs();
+    new Future.delayed(Duration.zero, () {
+      _fetchBlogs(context);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: GestureDetector(
-          child: Text('首页'),
-          onTap: () {
-            _fetchBlogs();
-          },
-        ),
-      ),
+          title: GestureDetector(
+            child: Text('首页'),
+            onTap: () {
+              _fetchBlogs(context);
+            },
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () {
+                _toBlogEditorPage(-1);
+              },
+            ),
+          ]),
       body: Container(
         padding: EdgeInsets.only(top: 10),
         child: ListView.builder(

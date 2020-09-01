@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:quill_delta/quill_delta.dart';
 import 'package:zefyr/zefyr.dart';
 import 'package:notus/convert.dart';
+import 'package:kis_app/pages/HomePage.dart';
 import 'package:kis_app/widgets/Request.dart';
 import 'package:kis_app/widgets/Toast.dart';
+import 'package:kis_app/widgets/Loading.dart';
 
 class BlogEditorPage extends StatefulWidget {
   BlogEditorPage({Key key, this.id}) : super(key: key);
@@ -16,7 +18,9 @@ class BlogEditorPage extends StatefulWidget {
 
 class BlogEditorPageState extends State<BlogEditorPage> {
   final _scaffoldKey = new GlobalKey<ScaffoldState>();
-  final _formKey = GlobalKey<FormState>();
+  final titleCtrl = new TextEditingController();
+  final summaryCtrl = new TextEditingController();
+  final pathnameCtrl = new TextEditingController();
   ZefyrController _controller;
   FocusNode _focusNode;
   List categories = [];
@@ -27,17 +31,18 @@ class BlogEditorPageState extends State<BlogEditorPage> {
     {"label": "置顶", "value": "TOP"},
     {"label": "隐藏", "value": "HIDE"},
   ];
-  String title = '';
   String content = '';
   String status = 'DRAFT';
   int categoryId = 0;
   List tagIds = [];
+  var submitting = false;
 
-  final titleCtrl = new TextEditingController();
-  final summaryCtrl = new TextEditingController();
-  final pathnameCtrl = new TextEditingController();
-
-  _fetchBlog() async {
+  _fetchBlog(context) async {
+    // id 为 -1 代表新增
+    if (widget.id == -1) {
+      return;
+    }
+    Loading.show(context);
     try {
       final r = await Request.get("/api/v1/blog/${widget.id}");
       final res = r.json();
@@ -63,12 +68,13 @@ class BlogEditorPageState extends State<BlogEditorPage> {
         _controller = ZefyrController(document);
       });
     } catch (e) {
-      print(e);
       Toast.show(context, "提示", "抱歉, 服务器开小差了");
+    } finally {
+      Loading.hide(context);
     }
   }
 
-  _fetchCategories() async {
+  _fetchCategories(context) async {
     try {
       final r = await Request.get("/api/v1/category");
       final res = r.json();
@@ -84,7 +90,7 @@ class BlogEditorPageState extends State<BlogEditorPage> {
     }
   }
 
-  _fetchTags() async {
+  _fetchTags(context) async {
     try {
       final r = await Request.get("/api/v1/tag");
       final res = r.json();
@@ -100,14 +106,14 @@ class BlogEditorPageState extends State<BlogEditorPage> {
     }
   }
 
-  _saveDocument(context) {
+  _showDrawer(context) {
     _scaffoldKey.currentState.openEndDrawer();
   }
 
   _saveBlog(context) async {
     final _delta = _controller.document.toDelta();
     final _content = notusMarkdown.encode(_delta);
-    if (title == '') {
+    if (titleCtrl.text == '') {
       Toast.show(context, "提示", "请输入标题");
       return;
     }
@@ -124,8 +130,7 @@ class BlogEditorPageState extends State<BlogEditorPage> {
       return;
     }
     var formData = {
-      "id": widget.id,
-      "title": title,
+      "title": titleCtrl.text,
       "content": _content,
       "summary": summaryCtrl.text,
       "pathname": pathnameCtrl.text,
@@ -134,18 +139,51 @@ class BlogEditorPageState extends State<BlogEditorPage> {
       "tagIds": tagIds
     };
     var headers = {"content-type": "application/json"};
+    setState(() {
+      submitting = true;
+    });
     try {
-      final r = await Request.put("/api/v1/blog/${widget.id}",
-          headers: headers, body: formData);
+      var r;
+      if (widget.id == -1) {
+        r = await Request.post("/api/v1/blog",
+            headers: headers, body: formData);
+      } else {
+        formData['id'] = widget.id;
+        r = await Request.put("/api/v1/blog/${widget.id}",
+            headers: headers, body: formData);
+      }
       final res = r.json();
       if (!res['success']) {
         Toast.show(context, "提示", res['message']);
         return;
       }
-      Toast.show(context, "提示", res['message']);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("提示"),
+              content: Text(res['message']),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("确认"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    // 跳转到首页
+                    Navigator.push(
+                        context,
+                        new MaterialPageRoute(
+                            builder: (context) => new HomePage()));
+                  },
+                )
+              ],
+            );
+          });
     } catch (e) {
-      print(e);
       Toast.show(context, "提示", "抱歉, 服务器开小差了");
+    } finally {
+      setState(() {
+        submitting = false;
+      });
     }
   }
 
@@ -283,14 +321,21 @@ class BlogEditorPageState extends State<BlogEditorPage> {
                   .toList(),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: RaisedButton(
-                color: Colors.teal,
-                onPressed: () {
-                  _saveBlog(context);
-                },
-                child: Text('提交', style: TextStyle(color: Colors.white)),
-              ),
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: submitting
+                  ? RaisedButton(
+                      child: Text("提交中..."),
+                      color: Colors.teal,
+                      colorBrightness: Brightness.dark,
+                      onPressed: null,
+                    )
+                  : RaisedButton(
+                      color: Colors.teal,
+                      onPressed: () {
+                        _saveBlog(context);
+                      },
+                      child: Text('提交', style: TextStyle(color: Colors.white)),
+                    ),
             ),
           ],
         ),
@@ -301,9 +346,11 @@ class BlogEditorPageState extends State<BlogEditorPage> {
   @override
   void initState() {
     super.initState();
-    _fetchCategories();
-    _fetchBlog();
-    _fetchTags();
+    new Future.delayed(Duration.zero, () {
+      _fetchCategories(context);
+      _fetchBlog(context);
+      _fetchTags(context);
+    });
     final delta = Delta()..insert("\n");
     final document = NotusDocument.fromDelta(delta);
     _controller = ZefyrController(document);
@@ -315,12 +362,12 @@ class BlogEditorPageState extends State<BlogEditorPage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(title),
+        title: Text(titleCtrl.text),
         actions: <Widget>[
           Builder(
             builder: (context) => IconButton(
-              icon: Icon(Icons.save),
-              onPressed: () => _saveDocument(context),
+              icon: Icon(Icons.send),
+              onPressed: () => _showDrawer(context),
             ),
           )
         ],

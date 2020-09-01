@@ -78,7 +78,7 @@ class _SideDrawerState extends State<SideDrawer> {
                   color: Colors.grey,
                 ),
                 ListTile(
-                  leading: Icon(Icons.power),
+                  leading: Icon(Icons.settings_power),
                   title: Text('退出'),
                   onTap: () {},
                 ),
