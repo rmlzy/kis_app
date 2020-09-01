@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:kis_app/pages/HomePage.dart';
+import 'package:kis_app/pages/CategoryPage.dart';
+import 'package:kis_app/pages/TagPage.dart';
 import 'package:kis_app/widgets/Request.dart';
 import 'package:kis_app/widgets/Toast.dart';
 
@@ -26,7 +29,7 @@ class _SideDrawerState extends State<SideDrawer> {
       }
       setState(() {
         nickname = res['data']['nickname'];
-        avatar = Request.host + res['data']['avatar'];
+        avatar = res['data']['avatar'];
         email = res['data']['email'];
         level = res['data']['level'];
       });
@@ -34,6 +37,21 @@ class _SideDrawerState extends State<SideDrawer> {
       print(e);
       Toast.show(context, "提示", "获取用户信息失败");
     }
+  }
+
+  _toHomePage() {
+    Navigator.push(
+        context, new MaterialPageRoute(builder: (context) => new HomePage()));
+  }
+
+  _toCategoryPage() {
+    Navigator.push(
+        context, new MaterialPageRoute(builder: (context) => new CategoryPage()));
+  }
+
+  _toTagPage() {
+    Navigator.push(
+        context, new MaterialPageRoute(builder: (context) => new TagPage()));
   }
 
   @override
@@ -59,19 +77,25 @@ class _SideDrawerState extends State<SideDrawer> {
             child: ListView(
               children: <Widget>[
                 ListTile(
-                  leading: Icon(Icons.attach_file),
-                  title: Text('首页'),
-                  onTap: () {},
+                  leading: Icon(Icons.dashboard),
+                  title: Text('控制台'),
+                  onTap: () {
+                    _toHomePage();
+                  },
                 ),
                 ListTile(
                   leading: Icon(Icons.category),
-                  title: Text('分类'),
-                  onTap: () {},
+                  title: Text('分类管理'),
+                  onTap: () {
+                    _toCategoryPage();
+                  },
                 ),
                 ListTile(
-                  leading: Icon(Icons.tag_faces),
-                  title: Text('标签'),
-                  onTap: () {},
+                  leading: Icon(Icons.local_offer),
+                  title: Text('标签管理'),
+                  onTap: () {
+                    _toTagPage();
+                  },
                 ),
                 Divider(
                   height: 1.0,

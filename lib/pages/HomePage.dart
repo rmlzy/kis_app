@@ -115,11 +115,17 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _renderPaper(context, index) {
+  _renderBlog(context, index) {
     final blog = blogs[index];
     return Card(
       child: ListTile(
         contentPadding: EdgeInsets.only(top: 8, bottom: 8, left: 15, right: 15),
+        leading: CircleAvatar(
+          backgroundColor: Theme.of(context).accentColor,
+          backgroundImage: blog['User']['avatar'] == ''
+              ? null
+              : NetworkImage(blog['User']['avatar']),
+        ),
         title: Container(
           padding: EdgeInsets.only(bottom: 5),
           child: Text(blog['title']),
@@ -145,8 +151,7 @@ class _HomePageState extends State<HomePage> {
           onSelected: (action) {
             _onSelectBlog(context, blog, action);
           },
-          itemBuilder: (context) =>
-          [
+          itemBuilder: (context) => [
             const PopupMenuItem(
               value: "PREVIEW",
               child: Text('预览'),
@@ -215,7 +220,7 @@ class _HomePageState extends State<HomePage> {
         child: ListView.builder(
             itemCount: blogs.length,
             itemBuilder: (context, index) {
-              return _renderPaper(context, index);
+              return _renderBlog(context, index);
             }),
       ),
       drawer: Padding(

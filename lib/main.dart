@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'pages/HomePage.dart';
+import 'pages/CategoryPage.dart';
 import 'pages/LoginPage.dart';
 
 void main() => runApp(new MyApp());
@@ -13,7 +14,8 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(primarySwatch: Colors.blueGrey),
       home: new LoginPage(),
       routes: <String, WidgetBuilder>{
-        '/login': (BuildContext ctx) => new LoginPage(),
+        '/login': (context) => new LoginPage(),
+        '/category': (context) => new CategoryPage()
       },
     );
   }
