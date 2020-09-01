@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'Hello Flutter',
-      theme: new ThemeData(primarySwatch: Colors.teal),
+      theme: new ThemeData(primarySwatch: Colors.blueGrey),
       home: new LoginPage(),
       routes: <String, WidgetBuilder>{
         '/login': (BuildContext ctx) => new LoginPage(),

@@ -146,13 +146,13 @@ class _LoginPageState extends State<LoginPage> {
                   child: _submitting
                       ? RaisedButton(
                           child: Text("登录中..."),
-                          color: Colors.teal,
+                          color: Colors.blueGrey,
                           colorBrightness: Brightness.dark,
                           onPressed: null,
                         )
                       : RaisedButton(
                           child: Text("登录"),
-                          color: Colors.teal,
+                          color: Colors.blueGrey,
                           colorBrightness: Brightness.dark,
                           onPressed: () async {
                             _login();

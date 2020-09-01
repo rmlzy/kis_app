@@ -239,7 +239,7 @@ class BlogEditorPageState extends State<BlogEditorPage> {
                           style: TextStyle(color: Colors.white),
                         ),
                         color: categoryId == item['id']
-                            ? Colors.teal
+                            ? Colors.blueGrey
                             : Colors.grey,
                         onPressed: () {
                           setState(() {
@@ -272,7 +272,7 @@ class BlogEditorPageState extends State<BlogEditorPage> {
                           style: TextStyle(color: Colors.white),
                         ),
                         color: tagIds.contains(item['id'])
-                            ? Colors.teal
+                            ? Colors.blueGrey
                             : Colors.grey,
                         onPressed: () {
                           setState(() {
@@ -309,7 +309,7 @@ class BlogEditorPageState extends State<BlogEditorPage> {
                           style: TextStyle(color: Colors.white),
                         ),
                         color:
-                            status == item['value'] ? Colors.teal : Colors.grey,
+                            status == item['value'] ? Colors.blueGrey : Colors.grey,
                         onPressed: () {
                           setState(() {
                             status = item['value'];
@@ -325,12 +325,12 @@ class BlogEditorPageState extends State<BlogEditorPage> {
               child: submitting
                   ? RaisedButton(
                       child: Text("提交中..."),
-                      color: Colors.teal,
+                      color: Colors.blueGrey,
                       colorBrightness: Brightness.dark,
                       onPressed: null,
                     )
                   : RaisedButton(
-                      color: Colors.teal,
+                      color: Colors.blueGrey,
                       onPressed: () {
                         _saveBlog(context);
                       },

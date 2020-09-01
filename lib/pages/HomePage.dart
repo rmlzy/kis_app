@@ -33,6 +33,88 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  _renderDot(status) {
+    var color = Colors.grey;
+    if (status == 'PUBLISHED') {
+      color = Colors.green;
+    }
+    if (status == 'TOP') {
+      color = Colors.red;
+    }
+    if (status == 'HIDE') {
+      color = Colors.blue;
+    }
+    return Container(
+      height: 8.0,
+      width: 8.0,
+      margin: EdgeInsets.only(right: 8.0),
+      decoration: new BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+      ),
+    );
+  }
+
+  _renderTag(type) {
+    return Container(
+      margin: EdgeInsets.only(left: 8.0),
+      padding: EdgeInsets.only(left: 5, right: 5),
+      child: Text(
+        type == 'MARKDOWN' ? 'MD' : '富文本',
+        style: TextStyle(color: Colors.blueGrey),
+      ),
+    );
+  }
+
+  _deleteBlog(context, id) async {
+    try {
+      final r = await Request.delete("/api/v1/blog/${id}");
+      final res = r.json();
+      print(res);
+      if (!res['success']) {
+        Toast.show(context, "提示", res['message']);
+        return;
+      }
+      await _fetchBlogs(context);
+    } catch (e) {
+      Toast.show(context, "提示", "抱歉, 服务器开小差了");
+    }
+  }
+
+  _onSelectBlog(context, blog, action) {
+    if (action == 'PREVIEW') {
+      _toBlogWebViewPage(blog['title'], blog['pathname']);
+    }
+    if (action == 'EDIT') {
+      _toBlogEditorPage(blog['id']);
+    }
+    if (action == 'DELETE') {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("提示"),
+              content: Text("删除以后无法恢复, 是否继续?"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("确认", style: TextStyle(color: Colors.grey)),
+                  onPressed: () async {
+                    await _deleteBlog(context, blog['id']);
+                    Navigator.of(context).pop();
+                  },
+                ),
+                FlatButton(
+                  child: Text("取消"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+    }
+  }
+
   _renderPaper(context, index) {
     final blog = blogs[index];
     return Card(
@@ -47,16 +129,42 @@ class _HomePageState extends State<HomePage> {
           children: [
             Container(
               padding: EdgeInsets.only(bottom: 5),
-              child: Text("${blog['createdAt']}"),
+              child: Row(
+                children: [
+                  _renderDot(blog['status']),
+                  Text("${blog['createdAt']}"),
+                  _renderTag(blog['type'])
+                ],
+              ),
             ),
             blog['summary'] != '' ? Text("${blog['summary']}") : Container()
           ],
         ),
-        trailing: Icon(Icons.arrow_right),
-        onTap: () {
-//          _toBlogWebViewPage(blog['title'], blog['pathname']);
-          _toBlogEditorPage(blog['id']);
-        },
+        trailing: PopupMenuButton(
+          child: Icon(Icons.more_vert),
+          onSelected: (action) {
+            _onSelectBlog(context, blog, action);
+          },
+          itemBuilder: (context) =>
+          [
+            const PopupMenuItem(
+              value: "PREVIEW",
+              child: Text('预览'),
+            ),
+            const PopupMenuItem(
+              value: "EDIT",
+              child: Text('编辑'),
+            ),
+            const PopupMenuItem(
+              value: "DELETE",
+              child: Text(
+                '删除',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        ),
+        onTap: null,
       ),
     );
   }

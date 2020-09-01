@@ -22,6 +22,16 @@ class Request {
         bodyEncoding: bodyEncoding);
   }
 
+  static delete(String url,
+      {Map<String, String> headers, queryParameters, bodyEncoding}) async {
+    if (headers == null) headers = new Map();
+    headers['token'] = await getCookie('token');
+    return Requests.delete(host + url,
+        headers: headers,
+        queryParameters: queryParameters,
+        bodyEncoding: bodyEncoding);
+  }
+
   static post(String url,
       {Map<String, String> headers,
       queryParameters,
@@ -38,9 +48,9 @@ class Request {
 
   static put(String url,
       {Map<String, String> headers,
-        queryParameters,
-        bodyEncoding = RequestBodyEncoding.JSON,
-        body}) async {
+      queryParameters,
+      bodyEncoding = RequestBodyEncoding.JSON,
+      body}) async {
     if (headers == null) headers = new Map();
     headers['token'] = await getCookie('token');
     return Requests.put(host + url,

@@ -60,7 +60,7 @@ class _SideDrawerState extends State<SideDrawer> {
               children: <Widget>[
                 ListTile(
                   leading: Icon(Icons.attach_file),
-                  title: Text('文章'),
+                  title: Text('首页'),
                   onTap: () {},
                 ),
                 ListTile(
